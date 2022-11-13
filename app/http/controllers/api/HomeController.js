@@ -5,7 +5,7 @@ const Controller = require('../controller')
 module.exports = new (class HomeController extends Controller {
   async indexPage(req, res, next) {
     try {
-      const result = await authSchema.validateAsync(req.body)
+      // const result = await authSchema.validateAsync(req.body)
       return res.status(200).send('Index page store')
     } catch (error) {
       next(createHttpError.BadRequest(error.message))
