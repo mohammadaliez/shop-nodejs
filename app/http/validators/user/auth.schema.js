@@ -1,7 +1,9 @@
 const Joi = require('@hapi/joi')
 const authSchema = Joi.object({
-  email: Joi.string().lowercase().trim().email().required(),
-  password: Joi.string().min(6).max(16).trim().required(),
+  mobile: Joi.string()
+    .length(11)
+    .pattern(/^[0-9]+$/)
+    .required(),
 })
 
 module.exports = {
