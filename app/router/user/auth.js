@@ -5,12 +5,12 @@ const UserAthController = require('../../http/controllers/user/auth/auth.control
  * @swagger
  *  tags:
  *      name : User-Authentication
- *      description: user auth section 
+ *      description: user auth section
  */
 
 /**
  * @swagger
- *  /user/login:
+ *  /user/get-otp:
  *      post:
  *          summary: login user in use panel with phone number
  *          description: one time password(OTP) login
@@ -33,7 +33,36 @@ const UserAthController = require('../../http/controllers/user/auth/auth.control
  *
  */
 
-router.post('/login', UserAthController.login)
+router.post('/get-otp', UserAthController.getOtp)
+/**
+ * @swagger
+ *  /user/check-otp:
+ *    post:
+ *          summary: check otp
+ *          description: check otp with mobile code
+ *          tags: [User-Authentication]
+ *          parameters:
+ *          -   name: mobile
+ *              description: fa-IRI phone number
+ *              in: formData
+ *              required: true
+ *              type: string
+ *          -   name: code
+ *              description: enter sms code received
+ *              in: formData
+ *              required: true
+ *              type: string
+ *          responses:
+ *              201:
+ *                  description: Success
+ *              400:
+ *                  description: Bad Request
+ *              401:
+ *                  description: Unauthorized
+ *              500:
+ *                  description: Internal Server Error
+ */
+router.post('/check-otp', UserAthController.checkOtp)
 module.exports = {
   UserAuthRoutes: router,
 }

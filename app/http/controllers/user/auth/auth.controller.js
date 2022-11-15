@@ -1,14 +1,20 @@
 const createHttpError = require('http-errors')
 const {UserModel} = require('../../../../models/users')
 const {EXPIRES_IN, USER_ROLE} = require('../../../../utils/constants')
-const {randomNumberGenerator} = require('../../../../utils/functions')
-const {authSchema} = require('../../../validators/user/auth.schema')
+const {
+  randomNumberGenerator,
+  signAccessToken,
+} = require('../../../../utils/functions')
+const {
+  getOtpSchema,
+  checkOtpSchema,
+} = require('../../../validators/user/auth.schema')
 const Controller = require('../../controller')
 
 module.exports = new (class UserAthController extends Controller {
-  async login(req, res, next) {
+  async getOtp(req, res, next) {
     try {
-      await authSchema.validateAsync(req.body)
+      await getOtpSchema.validateAsync(req.body)
       const {mobile} = req.body
       const code = randomNumberGenerator()
       const result = await this.saveUser(mobile, code)
@@ -25,6 +31,30 @@ module.exports = new (class UserAthController extends Controller {
       next(error)
     }
   }
+
+  async checkOtp(req, res, next) {
+    try {
+      await checkOtpSchema.validateAsync(req.body)
+      const {mobile, code} = req.body
+      console.log(code)
+      const user = await UserModel.findOne({mobile})
+      if (!user) throw createHttpError.NotFound('user not found')
+      if (user.otp.code != code)
+        throw createHttpError.Unauthorized('sent code not correct')
+      const now = Date.now()
+      if (+user.otp.expiresIn < now)
+        throw createHttpError.Unauthorized('code has been expired')
+      const accessToken = await signAccessToken(user._id)
+      return res.json({
+        data: {
+          accessToken,
+        },
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   async saveUser(mobile, code) {
     const otp = {
       code,
@@ -43,10 +73,12 @@ module.exports = new (class UserAthController extends Controller {
       roles: [USER_ROLE],
     }))
   }
+
   async checkExistUser(mobile) {
     const user = await UserModel.findOne({mobile})
     return !!user
   }
+
   async updateUser(mobile, objectData = {}) {
     Object.keys(objectData).forEach(key => {
       if (['', ' ', 0, null, undefined, '0', NaN].includes(objectData[key]))
