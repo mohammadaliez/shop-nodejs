@@ -11,7 +11,6 @@ function verifyAccessToken(req, res, next) {
     JWT.verify(token, ACCESS_TOKEN_SECRET_KEY, async (err, payload) => {
       if (err) return next(createHttpError.Unauthorized('please login'))
       const {mobile} = payload || {}
-      console.log(mobile)
       const user = await UserModel.findOne({mobile}, {password: 0, otp: 0})
       if (!user) return next(createHttpError.Unauthorized('user not found'))
       req.user = user

@@ -4,6 +4,8 @@ const {EXPIRES_IN, USER_ROLE} = require('../../../../utils/constants')
 const {
   randomNumberGenerator,
   signAccessToken,
+  verifyRefreshToken,
+  signRefreshToken,
 } = require('../../../../utils/functions')
 const {
   getOtpSchema,
@@ -36,7 +38,6 @@ module.exports = new (class UserAthController extends Controller {
     try {
       await checkOtpSchema.validateAsync(req.body)
       const {mobile, code} = req.body
-      console.log(code)
       const user = await UserModel.findOne({mobile})
       if (!user) throw createHttpError.NotFound('user not found')
       if (user.otp.code != code)
@@ -45,16 +46,34 @@ module.exports = new (class UserAthController extends Controller {
       if (+user.otp.expiresIn < now)
         throw createHttpError.Unauthorized('code has been expired')
       const accessToken = await signAccessToken(user._id)
+      const refreshToken = await signRefreshToken(user._id)
       return res.json({
         data: {
           accessToken,
+          refreshToken,
         },
       })
     } catch (error) {
       next(error)
     }
   }
-
+  async refreshToken(req, res, next) {
+    try {
+      const {refreshToken} = req.body
+      const mobile = await verifyRefreshToken(refreshToken)
+      const user = await UserModel.findOne({mobile})
+      const accessToken = await signAccessToken(user._id)
+      const newRefreshToken = await signRefreshToken(user._id)
+      return res.status(200).json({
+        data: {
+          accessToken,
+          refreshToken: newRefreshToken,
+        },
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
   async saveUser(mobile, code) {
     const otp = {
       code,
