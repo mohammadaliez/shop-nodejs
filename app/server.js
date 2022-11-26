@@ -19,6 +19,7 @@ module.exports = class Application {
     this.createServer()
     this.createRoutes()
     this.errorHandling()
+    this.initRedis()
   }
   configApplication() {
     this.#app.use(cors())
@@ -70,6 +71,9 @@ module.exports = class Application {
       console.log('disconnected')
       process.exit(0)
     })
+  }
+  initRedis() {
+    require('./utils/init-redis')
   }
   createRoutes() {
     this.#app.use(AllRoutes)
