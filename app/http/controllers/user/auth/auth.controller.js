@@ -1,6 +1,6 @@
 const createHttpError = require('http-errors')
 const {UserModel} = require('../../../../models/users')
-const {EXPIRES_IN, USER_ROLE} = require('../../../../utils/constants')
+const {USER_ROLE} = require('../../../../utils/constants')
 const {
   randomNumberGenerator,
   signAccessToken,
@@ -77,7 +77,7 @@ module.exports = new (class UserAthController extends Controller {
   async saveUser(mobile, code) {
     const otp = {
       code,
-      expiresIn: EXPIRES_IN,
+      expiresIn: new Date().getTime() + 120000,
     }
     const result = await this.checkExistUser(mobile)
     if (result) {
