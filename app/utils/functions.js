@@ -37,8 +37,8 @@ function signRefreshToken(userID) {
     }
     jwt.sign(payload, REFRESH_TOKEN_SECRET_KEY, options, async (err, token) => {
       if (err) reject(createHttpError.InternalServerError('Server Error'))
-      const expireTime = 365 * 24 * 60 * 60
-      await redisClient.SETEX(userID, expireTime, token)
+      const userIDStr = String(userID)
+      await redisClient.SETEX(userIDStr, 365 * 24 * 60 * 60, token)
       resolve(token)
     })
   })
@@ -50,7 +50,7 @@ function verifyRefreshToken(token) {
       const {mobile} = payload || {}
       const user = await UserModel.findOne({mobile}, {password: 0, otp: 0})
       if (!user) reject(createHttpError.Unauthorized('user not found'))
-      const refreshToken = await redisClient.get(user._id)
+      const refreshToken = await redisClient.get(String(user._id))
       if (token === refreshToken) return resolve(mobile)
       reject(createHttpError.Unauthorized('login again not success'))
     })

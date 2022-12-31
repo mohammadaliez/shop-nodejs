@@ -72,7 +72,7 @@ router.post('/check-otp', UserAthController.checkOtp)
  *        tags: [User-Authentication]
  *        parameters:
  *        -     name: refreshToken
- *              in: body
+ *              in: formData
  *              required: true
  *              type: string
  *        responses:

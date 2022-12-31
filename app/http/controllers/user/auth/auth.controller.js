@@ -1,6 +1,6 @@
 const createHttpError = require('http-errors')
 const {UserModel} = require('../../../../models/users')
-const {USER_ROLE} = require('../../../../utils/constants')
+const { ROLES} = require('../../../../utils/constants')
 const {
   randomNumberGenerator,
   signAccessToken,
@@ -89,7 +89,7 @@ module.exports = new (class UserAthController extends Controller {
     return !!(await UserModel.create({
       mobile,
       otp,
-      roles: [USER_ROLE],
+      roles: [ROLES.USER],
     }))
   }
 
